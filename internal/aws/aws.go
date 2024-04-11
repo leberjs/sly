@@ -2,15 +2,16 @@ package aws
 
 import (
 	"context"
-	"fmt"
-	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
+	"github.com/charmbracelet/log"
 )
 
 type AwsContext struct {
-	config aws.Config
+	config    aws.Config
+	CfnClient *cloudformation.Client
 }
 
 func NewAwsContext(profile string) AwsContext {
@@ -19,9 +20,10 @@ func NewAwsContext(profile string) AwsContext {
 		config.WithSharedConfigProfile(profile),
 	)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Issue getting AWS Shared Config Profile:", profile)
-		os.Exit(1)
+		log.Fatal("Issue getting AWS Shared Config Profile:", profile)
 	}
 
-	return AwsContext{config: config}
+	cfnClient := NewCfnClient(config)
+
+	return AwsContext{config: config, CfnClient: cfnClient}
 }
